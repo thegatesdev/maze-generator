@@ -9,7 +9,7 @@ public class Maze {
 
     private final int width, depth, corridorWidth, wallThickness, off;
 
-    private MazeItem[][] contents;
+    private Item[][] contents;
 
     public Maze(int width, int depth, int corridorWidth, int wallThickness) {
         // Size of 1 gap with 1 wall.
@@ -19,6 +19,10 @@ public class Maze {
         this.depth = depth * off + wallThickness;
         this.corridorWidth = corridorWidth;
         this.wallThickness = wallThickness;
+    }
+
+    public Maze(Vertex size, int corridorWidth, int wallThickness) {
+        this(size.x, size.y, corridorWidth, wallThickness);
     }
 
 
@@ -31,7 +35,7 @@ public class Maze {
         }
     }
 
-    static <T> void fill2dArrayAt(T[][] array, Vector2 from, Vector2 to, T item) {
+    static <T> void fill2dArrayAt(T[][] array, Vertex from, Vertex to, T item) {
         final int len = array.length;
         if (from.x > len || to.x > len || from.x < 0 || to.x < 0)
             throw new IllegalArgumentException("Vector size not within bounds");
@@ -44,21 +48,25 @@ public class Maze {
 
 
     public void generate(Random random) {
-        contents = new MazeItem[width][depth];
-        fill2dArray(contents, MazeItem.FILLED);
+        contents = new Item[width][depth];
+        fill2dArray(contents, Item.FILLED);
 
         // Start generation at bottom corner of bottom square.
-        randomizedDfs(random, new Vector2(wallThickness, wallThickness));
+        randomizedDfs(random, new Vertex(wallThickness, wallThickness));
     }
 
-    void randomizedDfs(Random random, Vector2 pos) {
+    public Item[][] getContents() {
+        return contents;
+    }
+
+    void randomizedDfs(Random random, Vertex pos) {
         final int yMax = Math.min(pos.y + corridorWidth, depth);
         final int xMax = Math.min(pos.x + corridorWidth, width);
 
         // Clear this square.
-        fill2dArrayAt(contents, pos, new Vector2(xMax, yMax), MazeItem.EMPTY);
+        fill2dArrayAt(contents, pos, new Vertex(xMax, yMax), Item.EMPTY);
 
-        Vector2 nextVertex = randomNeighbor(random, pos);
+        Vertex nextVertex = randomNeighbor(random, pos);
         // Iterate all neighbors (that aren't filled) in random order, and make them do the same.
         while (nextVertex != null) {
             connect(pos, nextVertex);
@@ -67,11 +75,10 @@ public class Maze {
         }
     }
 
-    Vector2 randomNeighbor(Random random, Vector2 pos) {
-        final List<Vector2> nbrs = new ArrayList<>(Arrays.asList(pos.copy().add(0, off), pos.copy().add(0, -off), pos.copy().add(off, 0), pos.copy().add(-off, 0)));
+    Vertex randomNeighbor(Random random, Vertex pos) {
+        final List<Vertex> nbrs = new ArrayList<>(Arrays.asList(pos.copy().add(0, off), pos.copy().add(0, -off), pos.copy().add(off, 0), pos.copy().add(-off, 0)));
 
-        nbrs.removeIf(i -> i.x < 0 || i.y < 0 || i.x >= width || i.y >= depth || contents[i.y][i.x] == MazeItem.EMPTY);
-
+        nbrs.removeIf(i -> i.x < 0 || i.y < 0 || i.x >= width || i.y >= depth || contents[i.x][i.y] == Item.EMPTY);
         if (nbrs.isEmpty()) {
             return null;
         }
@@ -81,25 +88,25 @@ public class Maze {
         return nbrs.get(random.nextInt(size));
     }
 
-    void connect(Vector2 a, Vector2 b) {
+    void connect(Vertex a, Vertex b) {
         if (b.x > a.x)
-            removeWall(new Vector2(a.x + corridorWidth, a.y), false);
+            removeWall(new Vertex(a.x + corridorWidth, a.y), false);
         if (a.x > b.x)
-            removeWall(new Vector2(b.x + corridorWidth, b.y), false);
+            removeWall(new Vertex(b.x + corridorWidth, b.y), false);
         if (b.y > a.y)
-            removeWall(new Vector2(a.x, a.y + corridorWidth), true);
+            removeWall(new Vertex(a.x, a.y + corridorWidth), true);
         if (a.y > b.y)
-            removeWall(new Vector2(b.x, b.y + corridorWidth), true);
+            removeWall(new Vertex(b.x, b.y + corridorWidth), true);
     }
 
-    void removeWall(Vector2 pos, boolean horizontal) {
+    void removeWall(Vertex pos, boolean horizontal) {
         final int yMax = Math.min(pos.y + (horizontal ? wallThickness : corridorWidth), depth);
         final int xMax = Math.min(pos.x + (horizontal ? corridorWidth : wallThickness), width);
-        fill2dArrayAt(contents, pos, new Vector2(xMax, yMax), MazeItem.EMPTY);
+        fill2dArrayAt(contents, pos, new Vertex(xMax, yMax), Item.EMPTY);
     }
 
 
-    enum MazeItem {
+    public enum Item {
         FILLED,
         EMPTY
     }
