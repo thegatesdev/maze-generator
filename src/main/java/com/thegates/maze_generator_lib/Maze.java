@@ -15,8 +15,8 @@ public class Maze {
         // Size of 1 gap with 1 wall.
         off = corridorWidth + wallThickness;
         // Add 1 wall at the end to close.
-        this.width = width * off + wallThickness;
-        this.depth = depth * off + wallThickness;
+        this.width = width;
+        this.depth = depth;
         this.corridorWidth = corridorWidth;
         this.wallThickness = wallThickness;
     }
@@ -79,6 +79,7 @@ public class Maze {
         final List<Vertex> nbrs = new ArrayList<>(Arrays.asList(pos.copy().add(0, off), pos.copy().add(0, -off), pos.copy().add(off, 0), pos.copy().add(-off, 0)));
 
         nbrs.removeIf(i -> i.x < 0 || i.y < 0 || i.x >= width || i.y >= depth || contents[i.x][i.y] == Item.EMPTY);
+
         if (nbrs.isEmpty()) {
             return null;
         }
