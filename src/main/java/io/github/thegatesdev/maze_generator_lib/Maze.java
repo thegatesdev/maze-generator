@@ -1,4 +1,4 @@
-package com.thegates.maze_generator_lib;
+package io.github.thegatesdev.maze_generator_lib;
 
 import java.util.ArrayList;
 import java.util.Arrays;

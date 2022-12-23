@@ -4,9 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1ab2e730-2f42-4599-8156-ae099ba90a4e" name="Changes" comment="Update README.md for public.">
+    <list default="true" id="1ab2e730-2f42-4599-8156-ae099ba90a4e" name="Changes" comment="Keep input width">
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/thegates/maze_generator_lib/Maze.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/thegates/maze_generator_lib/Maze.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/thegates/maze_generator_lib/Maze.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/github/thegatesdev/maze_generator_lib/Maze.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/thegates/maze_generator_lib/Vertex.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/io/github/thegatesdev/maze_generator_lib/Vertex.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,15 +39,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;rearrange.code.on.save&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.project.maven.runner&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "rearrange.code.on.save": "true",
+    "settings.editor.selected.configurable": "reference.settings.project.maven.runner"
   }
-}</component>
+}]]></component>
   <component name="RunAnythingCache">
     <option name="myCommands">
       <command value="mvn clean build" />
@@ -81,7 +88,14 @@
       <option name="project" value="LOCAL" />
       <updated>1660146407524</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Keep input width">
+      <created>1661593719631</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1661593719631</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -99,6 +113,7 @@
     <MESSAGE value="Add utility methods for array fill.&#10;Compact code overall." />
     <MESSAGE value="Fix all neighbors every time." />
     <MESSAGE value="Update README.md for public." />
-    <option name="LAST_COMMIT_MESSAGE" value="Update README.md for public." />
+    <MESSAGE value="Keep input width" />
+    <option name="LAST_COMMIT_MESSAGE" value="Keep input width" />
   </component>
 </project>

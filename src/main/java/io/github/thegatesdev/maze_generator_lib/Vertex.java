@@ -1,4 +1,4 @@
-package com.thegates.maze_generator_lib;
+package io.github.thegatesdev.maze_generator_lib;
 
 public class Vertex {
 
