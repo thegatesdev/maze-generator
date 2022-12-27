@@ -36,7 +36,8 @@ public class Maze {
         generated = true;
     }
 
-    public BitSet[] getContents() {
+    public BitSet[] getGenerated() {
+        if (!generated) throw new RuntimeException("Not generated yet");
         return contents;
     }
 
@@ -52,15 +53,17 @@ public class Maze {
     }
 
     private Point randomNeighbor(Random random, Point pos) {
-        int active = 3;
+        int active = 4;
         final Point[] nbrs = new Point[]{
                 translateNew(pos, 0, -off), translateNew(pos, 0, off), translateNew(pos, off, 0), translateNew(pos, -off, 0)
         };
-        for (int i = 0; i < nbrs.length; i++) {
+        for (int i = 0; i < active; i++) {// Filter out of bounds or already cleared neighbors.
             final Point nbr = nbrs[i];
             if (!inMaze(nbr.x, nbr.y) || !contents[nbr.x].get(nbr.y)) {
                 // Not in maze or already cleared...
-                nbrs[i] = nbrs[active--]; // Make last element redundant, move last to this index ( clearing / removing the current neighbor ).
+                nbrs[i--] = nbrs[--active];
+                // Current neighbor is overridden by last, and last is out of the picture by decreasing active.
+                // Decrease i to check the current index again since we replaced it.
             }
         }
         if (active == 0) return null;// No neighbors.
@@ -71,11 +74,11 @@ public class Maze {
     private void connect(Point a, Point b) {
         if (b.x > a.x)
             removeWall(new Point(a.x + corridorWidth, a.y), false);
-        if (a.x > b.x)
+        else if (a.x > b.x)
             removeWall(new Point(b.x + corridorWidth, b.y), false);
-        if (b.y > a.y)
+        else if (b.y > a.y)
             removeWall(new Point(a.x, a.y + corridorWidth), true);
-        if (a.y > b.y)
+        else if (a.y > b.y)
             removeWall(new Point(b.x, b.y + corridorWidth), true);
     }
 
