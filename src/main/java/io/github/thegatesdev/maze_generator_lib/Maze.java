@@ -1,15 +1,15 @@
 package io.github.thegatesdev.maze_generator_lib;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.awt.*;
+import java.util.BitSet;
 import java.util.Random;
 
 public class Maze {
 
     private final int width, depth, corridorWidth, wallThickness, off;
 
-    private Item[][] contents;
+    private BitSet[] contents;
+    private boolean generated = false;
 
     public Maze(int width, int depth, int corridorWidth, int wallThickness) {
         // Size of 1 gap with 1 wall.
@@ -21,52 +21,82 @@ public class Maze {
         this.wallThickness = wallThickness;
     }
 
-    public Maze(Vertex size, int corridorWidth, int wallThickness) {
-        this(size.x, size.y, corridorWidth, wallThickness);
+    public static Point translateNew(Point point, int x, int y) {
+        return new Point(point.x + x, point.y + y);
     }
-
-
-    static <T> void fill2dArray(T[][] array, T item) {
-        for (int i = 0; i < array.length; i++) {
-            final T[] ts = array[i];
-            for (int y = 0; y < ts.length; y++) {
-                array[i][y] = item;
-            }
-        }
-    }
-
-    static <T> void fill2dArrayAt(T[][] array, Vertex from, Vertex to, T item) {
-        final int len = array.length;
-        if (from.x > len || to.x > len || from.x < 0 || to.x < 0)
-            throw new IllegalArgumentException("Vector size not within bounds");
-        for (int x = from.x; x < to.x; x++) {
-            for (int y = from.y; y < to.y; y++) {
-                array[x][y] = item;
-            }
-        }
-    }
-
 
     public void generate(Random random) {
-        contents = new Item[width][depth];
-        fill2dArray(contents, Item.FILLED);
-
+        fill();
         // Start generation at bottom corner of bottom square.
-        randomizedDfs(random, new Vertex(wallThickness, wallThickness));
+        try {
+            randomizedDfs(random, new Point(wallThickness, wallThickness));
+        } catch (Throwable e) {
+            throw new RuntimeException("Something went wrong trying to generate the maze.", e);
+        }
+        generated = true;
     }
 
-    public Item[][] getContents() {
+    public BitSet[] getContents() {
         return contents;
     }
 
-    void randomizedDfs(Random random, Vertex pos) {
+    public boolean isGenerated() {
+        return generated;
+    }
+
+    private void fill() {
+        contents = new BitSet[width];
+        for (int i = 0; i < width; i++) {
+            contents[i] = new BitSet(depth);
+        }
+    }
+
+    private Point randomNeighbor(Random random, Point pos) {
+        int active = 3;
+        final Point[] nbrs = new Point[]{
+                translateNew(pos, 0, -off), translateNew(pos, 0, off), translateNew(pos, off, 0), translateNew(pos, -off, 0)
+        };
+        for (int i = 0; i < nbrs.length; i++) {
+            final Point nbr = nbrs[i];
+            if (!inMaze(nbr.x, nbr.y) || !contents[nbr.x].get(nbr.y)) {
+                // Not in maze or already cleared...
+                nbrs[i] = nbrs[active--]; // Make last element redundant, move last to this index ( clearing / removing the current neighbor ).
+            }
+        }
+        if (active == 0) return null;// No neighbors.
+        if (active == 1) return nbrs[0];// 1 neighbor, no random call needed.
+        return nbrs[random.nextInt(active)];
+    }
+
+    private void connect(Point a, Point b) {
+        if (b.x > a.x)
+            removeWall(new Point(a.x + corridorWidth, a.y), false);
+        if (a.x > b.x)
+            removeWall(new Point(b.x + corridorWidth, b.y), false);
+        if (b.y > a.y)
+            removeWall(new Point(a.x, a.y + corridorWidth), true);
+        if (a.y > b.y)
+            removeWall(new Point(b.x, b.y + corridorWidth), true);
+    }
+
+    private void removeWall(Point pos, boolean horizontal) {
+        final int yMax = Math.min(pos.y + (horizontal ? wallThickness : corridorWidth), depth);
+        final int xMax = Math.min(pos.x + (horizontal ? corridorWidth : wallThickness), width);
+        for (int x = pos.x; x < xMax; x++) {
+            contents[x].clear(pos.y, yMax);
+        }
+    }
+
+    private void randomizedDfs(Random random, Point pos) {
         final int yMax = Math.min(pos.y + corridorWidth, depth);
         final int xMax = Math.min(pos.x + corridorWidth, width);
 
         // Clear this square.
-        fill2dArrayAt(contents, pos, new Vertex(xMax, yMax), Item.EMPTY);
+        for (int x = pos.x; x < xMax; x++) {
+            contents[x].clear(pos.y, yMax);
+        }
 
-        Vertex nextVertex = randomNeighbor(random, pos);
+        Point nextVertex = randomNeighbor(random, pos);
         // Iterate all neighbors (that aren't filled) in random order, and make them do the same.
         while (nextVertex != null) {
             connect(pos, nextVertex);
@@ -75,40 +105,7 @@ public class Maze {
         }
     }
 
-    Vertex randomNeighbor(Random random, Vertex pos) {
-        final List<Vertex> nbrs = new ArrayList<>(Arrays.asList(pos.copy().add(0, off), pos.copy().add(0, -off), pos.copy().add(off, 0), pos.copy().add(-off, 0)));
-
-        nbrs.removeIf(i -> i.x < 0 || i.y < 0 || i.x >= width || i.y >= depth || contents[i.x][i.y] == Item.EMPTY);
-
-        if (nbrs.isEmpty()) {
-            return null;
-        }
-        final int size = nbrs.size();
-        if (size == 1) return nbrs.get(0);
-
-        return nbrs.get(random.nextInt(size));
-    }
-
-    void connect(Vertex a, Vertex b) {
-        if (b.x > a.x)
-            removeWall(new Vertex(a.x + corridorWidth, a.y), false);
-        if (a.x > b.x)
-            removeWall(new Vertex(b.x + corridorWidth, b.y), false);
-        if (b.y > a.y)
-            removeWall(new Vertex(a.x, a.y + corridorWidth), true);
-        if (a.y > b.y)
-            removeWall(new Vertex(b.x, b.y + corridorWidth), true);
-    }
-
-    void removeWall(Vertex pos, boolean horizontal) {
-        final int yMax = Math.min(pos.y + (horizontal ? wallThickness : corridorWidth), depth);
-        final int xMax = Math.min(pos.x + (horizontal ? corridorWidth : wallThickness), width);
-        fill2dArrayAt(contents, pos, new Vertex(xMax, yMax), Item.EMPTY);
-    }
-
-
-    public enum Item {
-        FILLED,
-        EMPTY
+    private boolean inMaze(int x, int y) {
+        return x >= 0 && y >= 0 && x < width && y < depth;
     }
 }
