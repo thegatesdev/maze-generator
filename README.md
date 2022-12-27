@@ -1,5 +1,5 @@
 # maze-generator
 
-Basic maze generator. Converted C++ implementation from jochembroekhoff.
+Basic 2d maze generator using random. Inspired by the C++ implementation from jochembroekhoff.
 
-Generates a 2d grid with FILLED or EMPTY state.
+Uses an array of BitSet to represent the maze, each location in the maze has a filled (1) or empty (0) state.
