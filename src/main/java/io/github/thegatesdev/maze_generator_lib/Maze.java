@@ -1,39 +1,64 @@
 package io.github.thegatesdev.maze_generator_lib;
 
 import java.awt.*;
+import java.util.ArrayDeque;
 import java.util.BitSet;
+import java.util.Deque;
 import java.util.Random;
 
 public class Maze {
 
-    private final int width, depth, corridorWidth, wallThickness, off;
-
+    private static final Deque<Point> reusable = new ArrayDeque<>();
+    private final int width, depth, corridorWidth, wallThickness;
+    private final int[] neighborOffsets;
     private BitSet[] contents;
     private boolean generated = false;
 
     public Maze(int width, int depth, int corridorWidth, int wallThickness) {
-        // Size of 1 gap with 1 wall.
-        off = corridorWidth + wallThickness;
         // Add 1 wall at the end to close.
         this.width = width;
         this.depth = depth;
         this.corridorWidth = corridorWidth;
         this.wallThickness = wallThickness;
+
+        int off = corridorWidth + wallThickness;
+        neighborOffsets = new int[]{
+                off, 0,//R
+                0, off,//U
+                -off, 0,//L
+                0, -off//D
+        };
     }
 
-    public static Point translateNew(Point point, int x, int y) {
-        return new Point(point.x + x, point.y + y);
+    private static Point getPoint(int x, int y) {
+        if (reusable.isEmpty()) return new Point(x, y);
+        final Point pop = reusable.pop();
+        pop.setLocation(x, y);
+        return pop;
     }
+
+    private static void savePoint(Point point) {
+        reusable.push(point);
+    }
+
 
     public void generate(Random random) {
         fill();
         // Start generation at bottom corner of bottom square.
+        final Point start = getPoint(wallThickness, wallThickness);
         try {
-            randomizedDfs(random, new Point(wallThickness, wallThickness));
+            randomizedDfs(random, start);
         } catch (Throwable e) {
             throw new RuntimeException("Something went wrong trying to generate the maze.", e);
+        } finally {
+            savePoint(start);
         }
         generated = true;
+    }
+
+
+    public boolean isGenerated() {
+        return generated;
     }
 
     public BitSet[] getGenerated() {
@@ -41,9 +66,6 @@ public class Maze {
         return contents;
     }
 
-    public boolean isGenerated() {
-        return generated;
-    }
 
     private void fill() {
         contents = new BitSet[width];
@@ -53,22 +75,19 @@ public class Maze {
     }
 
     private Point randomNeighbor(Random random, Point pos) {
-        int active = 4;
-        final Point[] nbrs = new Point[]{
-                translateNew(pos, 0, -off), translateNew(pos, 0, off), translateNew(pos, off, 0), translateNew(pos, -off, 0)
-        };
-        for (int i = 0; i < active; i++) {// Filter out of bounds or already cleared neighbors.
-            final Point nbr = nbrs[i];
-            if (!inMaze(nbr.x, nbr.y) || !contents[nbr.x].get(nbr.y)) {
-                // Not in maze or already cleared...
-                nbrs[i--] = nbrs[--active];
-                // Current neighbor is overridden by last, and last is out of the picture by decreasing active.
-                // Decrease i to check the current index again since we replaced it.
+        final int rnd = random.nextInt(4) * 2;
+        Point last = null;
+        for (int i = 0; i < 8; i++) {
+            final int x = neighborOffsets[i++] + pos.x;
+            final int y = neighborOffsets[i] + pos.y;
+            if (inBounds(x, y) && contents[x].get(y)) {
+                // Random lower than or exact match.
+                if (i >= rnd) return getPoint(x, y);
+                if (last == null) last = getPoint(x, y);
+                else last.setLocation(x, y);
             }
-        }
-        if (active == 0) return null;// No neighbors.
-        if (active == 1) return nbrs[0];// 1 neighbor, no random call needed.
-        return nbrs[random.nextInt(active)];
+        }// rnd 4, items 2 and 3
+        return last;
     }
 
     private void connect(Point a, Point b) {
@@ -104,11 +123,12 @@ public class Maze {
         while (nextVertex != null) {
             connect(pos, nextVertex);
             randomizedDfs(random, nextVertex);
+            savePoint(nextVertex);
             nextVertex = randomNeighbor(random, pos);
         }
     }
 
-    private boolean inMaze(int x, int y) {
+    private boolean inBounds(int x, int y) {
         return x >= 0 && y >= 0 && x < width && y < depth;
     }
 }
