@@ -21,7 +21,7 @@ public class Maze {
         this.corridorWidth = corridorWidth;
         this.wallThickness = wallThickness;
 
-        int off = corridorWidth + wallThickness;
+        final int off = corridorWidth + wallThickness;
         neighborOffsets = new int[]{
                 off, 0,//R
                 0, off,//U
@@ -70,7 +70,9 @@ public class Maze {
     private void fill() {
         contents = new BitSet[width];
         for (int i = 0; i < width; i++) {
-            contents[i] = new BitSet(depth);
+            final BitSet set = new BitSet(depth);
+            set.set(0, depth);
+            contents[i] = set;
         }
     }
 
@@ -129,6 +131,6 @@ public class Maze {
     }
 
     private boolean inBounds(int x, int y) {
-        return x >= 0 && y >= 0 && x < width && y < depth;
+        return x > 0 && y > 0 && x < width && y < depth;
     }
 }
