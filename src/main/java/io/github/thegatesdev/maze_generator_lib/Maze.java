@@ -24,8 +24,8 @@ public class Maze {
         final int off = corridorWidth + wallThickness;
         neighborOffsets = new int[]{
                 off, 0,//R
-                0, off,//U
                 -off, 0,//L
+                0, off,//U
                 0, -off//D
         };
     }
@@ -94,13 +94,13 @@ public class Maze {
 
     private void connect(Point a, Point b) {
         if (b.x > a.x)
-            removeWall(new Point(a.x + corridorWidth, a.y), false);
+            removeWall(getPoint(a.x + corridorWidth, a.y), false);
         else if (a.x > b.x)
-            removeWall(new Point(b.x + corridorWidth, b.y), false);
+            removeWall(getPoint(b.x + corridorWidth, b.y), false);
         else if (b.y > a.y)
-            removeWall(new Point(a.x, a.y + corridorWidth), true);
+            removeWall(getPoint(a.x, a.y + corridorWidth), true);
         else if (a.y > b.y)
-            removeWall(new Point(b.x, b.y + corridorWidth), true);
+            removeWall(getPoint(b.x, b.y + corridorWidth), true);
     }
 
     private void removeWall(Point pos, boolean horizontal) {
@@ -109,6 +109,7 @@ public class Maze {
         for (int x = pos.x; x < xMax; x++) {
             contents[x].clear(pos.y, yMax);
         }
+        savePoint(pos);
     }
 
     private void randomizedDfs(Random random, Point pos) {
